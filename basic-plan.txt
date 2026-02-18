@@ -1,0 +1,276 @@
+להלן גרסה מעודכנת של כל התכנית — עם שינוי השם ל-**Haruki**, הציטוט של Haruki Murakami, והוספת פלטות הצבעים לבהיר/כהה.
+
+---
+
+## 1) מטרת המטלה
+
+לבנות אפליקציית Web בשם **Haruki**: “Personal Library / Wish List”
+השראה לשם:
+
+> “If you only read the books that everyone else is reading, you can only think what everyone else is thinking.” — Haruki Murakami (מופיע כציטוט שמיוחס ל־Norwegian Wood). ([Farnam Street][1])
+
+יכולות חובה:
+
+* חיפוש ספרים לפי כותרת/מחבר דרך Google Books API ([Google for Developers][2])
+* הצגת תוצאות ככרטיסים (עטיפה, כותרת, מחברים)
+* הוספה ל־Wish List, ומניעת הוספה כפולה (כפתור disabled/hidden אם כבר קיים)
+* מסך Wish List עם הסרה
+* שמירה מקומית שנשארת אחרי רענון (localStorage)
+* ניווט בין Search ↔ Wish List
+
+בונוסים:
+
+* Debounce לחיפוש
+* Loading / Error states + spinner/skeleton
+* Book detail modal (תיאור/תקציר)
+* מצב בהיר/כהה
+* עברית/אנגלית + RTL
+
+---
+
+## 2) סטאק שבחרת
+
+* React + TypeScript
+* Zustand לניהול state גלובלי
+* Tailwind + shadcn/ui לעיצוב
+* Framer Motion לאנימציות עדינות
+* ESLint + Prettier מההתחלה
+* Vitest + React Testing Library רק אם נשאר זמן בסוף
+* דיפלוי ב־Vercel
+* Supabase: לא חובה למטלה (כי הדרישה היא localStorage). אפשר לציין כ־Future enhancement לסנכרון בין מכשירים/משתמשים.
+
+---
+
+## 3) ארכיטקטורה מומלצת
+
+### עקרון על
+
+להפריד “דאטה עסקי” (Wish List) מהעדפות UI (Theme/Language), ולהשאיר Search כמצב מקומי.
+
+### Stores (Zustand)
+
+1. **wishlistStore (Business State)**
+
+* state: `items[]`
+* actions: `add(book)`, `remove(id)`
+* selector/derived: `isInWishList(id)` או `idsSet` כדי להשבית Add מהר ובפשטות
+* persist: localStorage (Zustand persist)
+
+2. **settingsStore (UI Preferences)**
+
+* `theme: light | dark | system` + persist
+* `language: en | he` + persist
+
+### Search state (לוקאלי בעמוד)
+
+* `query`, `results`, `loading`, `error`
+* Debounce לפני קריאה ל־API
+* ביטול/התעלמות מבקשות ישנות (כדי שלא תוצאה ישנה “תנצח”)
+
+### שכבת API נקייה
+
+* `googleBooksClient` שמבצע fetch ל־Volumes endpoints ([Google for Developers][2])
+* Adapter שממיר את התגובה למודל פנימי אחיד
+
+### מודל נתונים פנימי (Book)
+
+שמור רק מה שצריך ל־UI ול־Wish List:
+
+* `id` (volumeId)
+* `title`
+* `authors[]`
+* `thumbnail?`
+* `description?`
+
+---
+
+## 4) מבנה מסכים ורכיבים
+
+### Routes
+
+* `/` או `/search`
+* `/wishlist`
+* `/about` (“README יפה בתוך האפליקציה”)
+
+### Components
+
+* Navbar: קישורים + Theme toggle + Language switch
+* SearchBar
+* BookCard
+* BookGrid/List
+* BookDetailModal (בונוס)
+
+---
+
+## 5) דף About בתוך האפליקציה
+
+מטרה: “README יפה” אבל קצר, נקי, לא חופר.
+
+מבנה תוכן מומלץ:
+
+1. **פתיח קצר**
+
+* שם: Haruki
+* שורה אחת מה הוא עושה (בלי שיווקיות)
+* אפשר לשים את הציטוט למעלה (בקטן, לא דרמטי)
+
+2. **מה אפשר לעשות**
+
+* 4–5 שורות קצרות (חיפוש, הוספה, הסרה, שמירה מקומית, Theme/Language)
+
+3. **איך זה בנוי**
+
+* Wish List: Zustand + localStorage
+* Search: state מקומי + debounce + loading/error
+* UI: Tailwind + shadcn, קומפוננטות מודולריות
+* i18n/RTL + theme system
+
+4. **פרטיות**
+
+* משפט אחד ברור: הנתונים נשמרים בדפדפן בלבד (אלא אם בעתיד מוסיפים backend)
+
+5. **Credit**
+
+* “Book data from Google Books” ([Google for Developers][2])
+
+עיצוב About:
+
+* Layout צר ונעים לקריאה
+* Cards/Sections עם רווחים טובים
+* אפשר Tabs או Accordion כדי לא להעמיס טקסט
+
+---
+
+## 6) עיצוב: “לא להיראות AI”
+
+כללים (כמו שביקשת):
+
+* בלי אימוג’ים
+* בלי גווני סגול
+* בלי טקסטים ארוכים/מייגעים
+* שפה קצרה, עניינית, מוצרית
+* הרבה whitespace, כותרות קצרות, פסקאות של 1–2 שורות
+* בלי גרדיאנטים כבדים / glow / “נוצץ”
+
+### פלטות צבעים (בהיר/כהה) — להוסיף ל־סיכום וליישום
+
+**Light**
+
+```json
+{"bg":"#FFFBF5","fg":"#1C1917","muted":"#F5EFE6","border":"#E7DDCF","primary":"#F59E0B","accent":"#FBBF24","secondary":"#14532D"}
+```
+
+**Dark**
+
+```json
+{"bg":"#0F0D0A","fg":"#FAF7F2","muted":"#1A1713","border":"#2A241D","primary":"#FBBF24","accent":"#FCD34D","secondary":"#86EFAC"}
+```
+
+(הווייב יוצא “ספרים/נייר” עם הדגשות אמבר + ירוק “שקט”.)
+
+---
+
+## 7) אנימציות (Framer Motion) – עדכני אבל עדין
+
+* Page transition: fade + slide קטן (מהיר)
+* Hover על BookCard: תזוזה/scale מזעריים + shadow עדין
+* Modal: כניסה/יציאה חלקה + backdrop fade
+* Skeleton/Spinner בזמן טעינה
+* לכבד prefers-reduced-motion
+
+---
+
+## 8) תהליך עבודה: Vibe Coding “נכון”
+
+קבצי Spec לפני קוד:
+
+* PRD.md: דרישות + acceptance criteria
+* ARCH.md: החלטות ארכיטקטורה (stores, persist, i18n, theme, model)
+* TASKS.md: משימות קטנות עם “Done = …”
+* (אופציונלי) AGENTS.md: חוקים לסוכן
+
+לולאת עבודה לכל משימה: Plan → Patch → Verify → Commit
+
+סדר משימות מומלץ:
+
+1. Bootstrap פרויקט + Router + Tailwind/shadcn
+2. ESLint + Prettier
+3. Book model + adapter
+4. API client
+5. wishlistStore + persist
+6. SearchPage + Add disabled אם קיים
+7. WishListPage + Remove
+8. Navbar + routing
+9. Debounce + loading/error + empty states
+10. Book detail modal + animations (בונוס)
+11. Theme (light/dark/system)
+12. i18n en/he + RTL
+13. פוליש רספונסיבי
+14. Deploy ל־Vercel + README
+
+---
+
+## 9) הגשה
+
+* GitHub repo ציבורי
+* Deploy סטטי ב־Vercel
+* README.md קצר: איך להריץ מקומית, החלטות ארכיטקטורה, מה בונוס/מה חובה
+
+---
+
+## 10) Checklist קצר לאישור סופי (Acceptance)
+
+* חיפוש עובד ומציג cards
+* Add עובד ונחסם אם כבר נוסף
+* Wish List נשמר אחרי refresh
+* Remove עובד
+* ניווט עובד
+* טעינה/שגיאה/אין תוצאות מטופלים יפה
+* About קיים, קצר ומעוצב
+* Theme + Language עובדים כולל RTL
+* ESLint/Prettier רצים בלי שגיאות
+* הצבעים מיושמים לפי הפלטות למעלה (Light/Dark)
+
+---
+
+## 11) פרומפט מוכן להדבקה לקלוד קוד (ללא קוד)
+
+```text
+Project name: Haruki
+Build a React + TypeScript web app: search books via Google Books API and maintain a persistent Wish List.
+Use: Zustand (with persist to localStorage), Tailwind + shadcn/ui, Framer Motion.
+Quality: ESLint + Prettier from day 1. Add Vitest + React Testing Library only if time remains.
+
+Core routes:
+- /search (or /)
+- /wishlist
+- /about (a polished in-app README)
+
+Brand & colors:
+Light palette: {"bg":"#FFFBF5","fg":"#1C1917","muted":"#F5EFE6","border":"#E7DDCF","primary":"#F59E0B","accent":"#FBBF24","secondary":"#14532D"}
+Dark palette:  {"bg":"#0F0D0A","fg":"#FAF7F2","muted":"#1A1713","border":"#2A241D","primary":"#FBBF24","accent":"#FCD34D","secondary":"#86EFAC"}
+
+Architecture:
+- wishlistStore (business state): items[], add/remove, selector isInWishList(id) or idsSet, persist localStorage.
+- settingsStore (UI prefs): theme light/dark/system + language en/he, persist localStorage.
+- Search state is local to SearchPage (query/results/loading/error) with debounced input.
+- API layer: googleBooksClient + adapter to normalize response into Book:
+  { id, title, authors[], thumbnail?, description? }.
+
+About page requirements:
+- Clean, short, modern. No emojis. No purple. No long marketing text.
+- Include a short quote attribution line:
+  “If you only read the books that everyone else is reading, you can only think what everyone else is thinking.” — Haruki Murakami
+- Sections: Overview, Features (4–5 bullets), Architecture (4 bullets), Privacy (1 line), Credits (Google Books).
+- Include subtle animations and respect prefers-reduced-motion.
+
+Workflow:
+- Create PRD.md, ARCH.md, TASKS.md first (and optionally AGENTS.md rules).
+- Implement tasks one-by-one using Plan → Patch → Verify → Commit.
+- For each task: propose plan + files, implement only that task, run lint/format, provide 2–3 manual test steps, then propose a concise commit message.
+```
+
+אם תרצה, אני יכול לנסח לך עכשיו *תוכן About* מוכן (עברית + אנגלית) בדיוק לפי הכללים שלך ובשפה “מוצרית” קצרה, כולל התאמה ל־RTL ולפלטות.
+
+[1]: https://fs.blog/reading-what-everyone-else-is-reading/?utm_source=chatgpt.com "Haruki Murakami on Reading What Everyone Else is ..."
+[2]: https://developers.google.com/books/docs/v1/reference/volumes?utm_source=chatgpt.com "Volume | Google Books APIs"
