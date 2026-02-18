@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { Book } from '@/features/books/types';
 
@@ -9,6 +9,7 @@ import LoadingState from '@/components/states/loading-state';
 import { searchGoogleBooks } from '@/features/books/api/google-books-client';
 import BookGrid from '@/features/books/components/book-grid';
 import SearchBar from '@/features/books/components/search-bar';
+import { useBookGridHandlers } from '@/hooks/use-book-grid-handlers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useI18n } from '@/i18n/use-i18n';
 import { useWishListStore } from '@/stores/wishlist-store';
@@ -34,38 +35,19 @@ export default function SearchPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [state, setState] = useState<SearchState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [activeBookId, setActiveBookId] = useState<string | null>(null);
   const [searchAttempt, setSearchAttempt] = useState(0);
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_DELAY);
 
-  const addToWishList = useWishListStore((store) => store.add);
-  const removeFromWishList = useWishListStore((store) => store.remove);
-  const isInWishList = useWishListStore((store) => store.isInWishList);
   // Subscribe to items so component re-renders when wishlist changes (needed for isInWishList updates)
   useWishListStore((store) => store.items);
 
-  const handleToggleWish = useCallback(
-    (book: Book, isCurrentlyInWishList: boolean) => {
-      if (isCurrentlyInWishList) {
-        removeFromWishList(book.id);
-        return;
-      }
-      addToWishList(book);
-    },
-    [addToWishList, removeFromWishList]
-  );
-
-  const handleToggleBookFlip = useCallback((bookId: string) => {
-    setActiveBookId((previous) => (previous === bookId ? null : bookId));
-  }, []);
-
-  const bookIdSet = useMemo(() => new Set(books.map((b) => b.id)), [books]);
+  const { isInWishList, handleToggleWish, handleToggleBookFlip, activeBookId } =
+    useBookGridHandlers(books);
 
   useEffect(() => {
     const normalizedQuery = debouncedQuery.trim();
     if (!normalizedQuery || normalizedQuery.length < MINIMUM_QUERY_LENGTH) {
       setBooks([]);
-      setActiveBookId(null);
       setState('idle');
       setErrorMessage('');
       return;
@@ -101,13 +83,6 @@ export default function SearchPage() {
       abortController.abort();
     };
   }, [debouncedQuery, searchAttempt]);
-
-  useEffect(() => {
-    if (!activeBookId || bookIdSet.has(activeBookId)) {
-      return;
-    }
-    setActiveBookId(null);
-  }, [activeBookId, bookIdSet]);
 
   return (
     <PageTransition>

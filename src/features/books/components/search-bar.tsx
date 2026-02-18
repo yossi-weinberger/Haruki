@@ -32,14 +32,14 @@ export default function SearchBar({
         <div className='min-w-0 flex-1'>
           <Input
             id='book-search-input'
-          name='search'
-          autoComplete='off'
-          value={query}
-          placeholder={t('searchInputPlaceholder')}
-          aria-label={t('searchInputLabel')}
-          onChange={(event_) => {
-            onQueryChange(event_.currentTarget.value);
-          }}
+            name='search'
+            autoComplete='off'
+            value={query}
+            placeholder={t('searchInputPlaceholder')}
+            aria-label={t('searchInputLabel')}
+            onChange={(event_) => {
+              onQueryChange(event_.currentTarget.value);
+            }}
           />
         </div>
         <Button

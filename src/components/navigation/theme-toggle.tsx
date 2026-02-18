@@ -39,7 +39,12 @@ export default function ThemeToggle() {
       <div className='theme-switch__container'>
         <div className='theme-switch__clouds' aria-hidden='true' />
         <div className='theme-switch__stars' aria-hidden='true'>
-          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 55' fill='none' aria-hidden='true'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 144 55'
+            fill='none'
+            aria-hidden='true'
+          >
             <path
               fillRule='evenodd'
               clipRule='evenodd'

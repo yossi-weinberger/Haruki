@@ -1,114 +1,135 @@
 # Haruki
 
-Haruki is a personal library and wish list web app.
-It lets you search books via Google Books API, keep a persistent wish list in localStorage, and manage your reading queue with a clean UI.
+A personal library and wish list web app. Search books via the Google Books API, keep a persistent wish list in the browser, and manage your reading queue with a responsive UI.
 
-## Core Features (MVP)
+**Demo:** [https://haruki-five.vercel.app/search](https://haruki-five.vercel.app/search)
 
-- Search books by title or author.
-- Display results as cards (cover, title, authors, short summary).
-- Add books to a persistent wish list.
-- Prevent duplicate add actions when a book already exists in the wish list.
-- Remove books from the wish list.
-- Navigate between Search, Wish List, and About pages.
-- Show loading, empty, and error states.
-- Open a book details modal with description, publisher, and published date.
-- Light / dark / system theme support.
+---
+
+## Features
+
+- **Search** — Find books by title or author (min 2 characters). Results are debounced and requests are cancelled on re-search.
+- **Book cards** — Grid of cards with cover, title, authors, and short summary. Flip a card to see publisher, publish date, and full description.
+- **Wish list (“My Books”)** — Add books from search; duplicates are prevented. Remove anytime. List persists across sessions (localStorage).
+- **Navigation** — Search, My Books, and About. Header with theme toggle (light / dark / system) and language (EN / HE).
+- **States** — Idle, loading, empty results, and error with retry. RTL support for Hebrew.
+- **Accessibility** — Reduced-motion respected; keyboard support for flip and actions.
+
+---
 
 ## Tech Stack
 
-- React 19 + TypeScript
-- React Router
-- Zustand (state + localStorage persistence)
-- Tailwind CSS 4 + shadcn-style UI components
-- Framer Motion (subtle transitions and interactions)
-- ESLint + Prettier
-- Vite
+| Area         | Stack                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| Runtime      | React 19, TypeScript 5.9                                                                 |
+| Routing      | React Router 7                                                                           |
+| State        | Zustand (wishlist + localStorage persist; settings for theme/language)                   |
+| UI           | Shadcn/ui, Radix UI, Tailwind CSS 4, Framer Motion, Tabler Icons, CVA, tailwind-merge   |
+| Build        | Vite 7, SWC (Vite React plugin)                                                          |
+| Code quality | ESLint 9, Prettier 3, TypeScript strict                                                  |
 
-## Routes
-
-- `/search` - book discovery and add flow
-- `/wishlist` - saved books and remove flow
-- `/about` - in-app project overview
+---
 
 ## Project Structure
 
 ```text
 src/
+  app.tsx                    # Routes and layout
+  main.tsx
+  vite-env.d.ts
+  styles/
+    global.css
   components/
-    layout/
-    navigation/
-    providers/
-    states/
-    ui/
-  features/books/
-    api/
-    components/
-    types.ts
+    layout/                  # app-shell, page-transition
+    navigation/              # main-nav, theme-toggle, language-toggle
+    providers/               # theme-sync
+    states/                  # loading-state, empty-state, error-state
+    ui/                      # button, card, dialog, input, dropdown-menu, like-button
+  features/
+    books/
+      api/                   # google-books-client, book-adapter
+      components/            # book-card, book-grid, book-like-button, search-bar, book-detail-modal
+      types.ts
   hooks/
+    use-debounced-value.ts
+    use-book-grid-handlers.ts
+  i18n/
+    messages.ts              # EN / HE strings
+    use-i18n.ts
+  lib/
+    constants/               # storage-keys
+    utils.ts
+    text-direction.ts
+    types/
   pages/
+    search-page.tsx
+    wishlist-page.tsx
+    about-page.tsx
   stores/
+    wishlist-store.ts        # Zustand + persist(localStorage)
+    settings-store.ts        # theme, language
 ```
+
+---
 
 ## Local Setup
 
-1. Install dependencies:
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Optional: add Google Books API key for higher quota.
+2. **Optional: Google Books API key** (for higher quota)
 
-   Create a `.env.local` file:
+   Create `.env.local`:
 
    ```bash
    VITE_GOOGLE_BOOKS_API_KEY=your_api_key_here
    ```
 
-3. Start development server:
+3. **Run the app**
 
    ```bash
    npm run dev
    ```
 
-## Scripts
+   Open the URL shown in the terminal (e.g. `http://localhost:5173`).
 
-- `npm run dev` - run local dev server
-- `npm run lint` - run ESLint
-- `npm run typecheck` - run TypeScript checks
-- `npm run build` - production build
-- `npm run preview` - preview production build locally
-- `npm run format` - run Prettier formatting
+---
 
-## Architecture Notes
+## Build & Scripts
 
-- Business state (`wishlist`) lives in `zustand` with localStorage persist.
-- UI preferences (`theme`, `language`) live in a separate settings store.
-- Search state stays local to `SearchPage` and uses debounce + request cancellation.
-- Google Books response is normalized through an adapter before rendering.
+| Command             | Description                    |
+| ------------------- | ------------------------------ |
+| `npm run dev`       | Start dev server               |
+| `npm run build`     | Type-check + production build  |
+| `npm run preview`   | Serve production build locally |
+| `npm run typecheck` | TypeScript only                |
+| `npm run lint`      | ESLint                         |
+| `npm run lint:fix`  | ESLint with auto-fix           |
+| `npm run format`    | Prettier format                |
+
+---
+
+## Architecture
+
+- **Wish list** — Single Zustand store with `items` and `itemIdIndex` for O(1) duplicate check. Persisted to localStorage via `persist`; survives refresh.
+- **Search** — Local state in `SearchPage`. Debounced query; AbortController cancels in-flight requests when the query changes.
+- **Books data** — Google Books responses are normalized in `book-adapter.ts` before use in the UI.
+- **Book grid** — Shared `BookGrid` + `BookCard` on Search and Wish List; logic (toggle wish, flip, active id) lives in `useBookGridHandlers`.
+- **Theme & language** — Settings store + `ThemeSync` provider; i18n via `useI18n` and `messages.ts` (EN/HE).
+
+---
 
 ## Privacy
 
-All wish list data is stored in browser localStorage only.
+All wish list data stays in the browser (localStorage). No backend; no server-side storage of your list.
+
+---
 
 ## Credits
 
-Book data is provided by Google Books API.
-
-## Status
-
-Implemented in this iteration:
-
-- Template cleanup (lean baseline)
-- App shell and routing
-- Search, wish list, persist, and duplicate prevention
-- About page
-- Book details modal
-- Motion polish with reduced-motion support
-
-Planned for next iteration:
-
-- i18n (English / Hebrew) + full RTL support
-- Automated tests
-- Optional backend sync
+- **Project template** — Bootstrapped from [vite-react-ts-shadcn-ui](https://github.com/doinel1a/vite-react-ts-shadcn-ui) (React 19, TypeScript, Shadcn/ui, Tailwind 4, Vite 7, ESLint 9).
+- **Book data** — [Google Books API](https://developers.google.com/books).
+- **UI components** — Some components (e.g. buttons, inputs) were adapted from designs on [uiverse.io](https://uiverse.io/).

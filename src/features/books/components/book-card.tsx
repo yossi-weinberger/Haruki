@@ -1,7 +1,8 @@
+import { memo } from 'react';
+
 import type { Book } from '@/features/books/types';
 import type { KeyboardEvent } from 'react';
 
-import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 import { useI18n } from '@/i18n/use-i18n';
@@ -64,9 +65,13 @@ function BookCard({
         >
           <div className='bg-muted border-border relative flex aspect-[2/3] w-full items-center justify-center border-b'>
             <span
-              className='absolute top-2 right-2 z-20 rtl:left-2 rtl:right-auto'
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
+              className='absolute top-2 right-2 z-20 rtl:right-auto rtl:left-2'
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+              onKeyDown={(event) => {
+                event.stopPropagation();
+              }}
             >
               <BookLikeButton
                 isLiked={isInWishList}
@@ -115,9 +120,13 @@ function BookCard({
         >
           <div className='book-flip-back-glow' />
           <span
-            className='absolute top-2 right-2 z-20 rtl:left-2 rtl:right-auto'
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
+            className='absolute top-2 right-2 z-20 rtl:right-auto rtl:left-2'
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+            onKeyDown={(event) => {
+              event.stopPropagation();
+            }}
           >
             <BookLikeButton
               isLiked={isInWishList}
@@ -127,14 +136,14 @@ function BookCard({
             />
           </span>
           <div className='relative z-10 flex h-full min-h-0 flex-col gap-3 px-4 py-4'>
-            <h3 dir={titleDirection} className='text-base leading-snug font-semibold shrink-0'>
+            <h3 dir={titleDirection} className='shrink-0 text-base leading-snug font-semibold'>
               {book.title}
             </h3>
-            <p dir={authorDirection} className='text-muted-foreground text-sm shrink-0'>
+            <p dir={authorDirection} className='text-muted-foreground shrink-0 text-sm'>
               {authorText}
             </p>
 
-            <dl className='text-sm shrink-0'>
+            <dl className='shrink-0 text-sm'>
               <div className='flex gap-2'>
                 <dt className='text-muted-foreground min-w-20'>{t('bookPublished')}:</dt>
                 <dd dir={detectTextDirection(book.publishedDate)}>

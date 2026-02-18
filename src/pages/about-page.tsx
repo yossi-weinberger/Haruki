@@ -8,14 +8,16 @@ export default function AboutPage() {
     t('featureTwo'),
     t('featureThree'),
     t('featureFour'),
-    t('featureFive')
+    t('featureFive'),
+    t('featureSix')
   ] as const;
 
   const architectureItems = [
     t('architectureOne'),
     t('architectureTwo'),
     t('architectureThree'),
-    t('architectureFour')
+    t('architectureFour'),
+    t('architectureFive')
   ] as const;
 
   return (
@@ -57,9 +59,38 @@ export default function AboutPage() {
         <p className='text-muted-foreground text-sm'>{t('aboutPrivacyText')}</p>
       </section>
 
+      <section className='surface space-y-4 p-5'>
+        <h2 className='text-lg font-semibold'>{t('aboutTechTitle')}</h2>
+        <p className='text-muted-foreground text-sm'>{t('aboutTechStack')}</p>
+      </section>
+
       <section className='surface space-y-3 p-5'>
         <h2 className='text-lg font-semibold'>{t('aboutCreditsTitle')}</h2>
         <p className='text-muted-foreground text-sm'>{t('aboutCreditsText')}</p>
+        <p className='text-muted-foreground text-sm'>
+          {t('aboutCreditsTemplate')}
+          <a
+            href='https://github.com/doinel1a/vite-react-ts-shadcn-ui'
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-primary underline underline-offset-2 hover:no-underline'
+          >
+            vite-react-ts-shadcn-ui
+          </a>
+          .
+        </p>
+        <p className='text-muted-foreground text-sm'>
+          {t('aboutCreditsUiverse')}
+          <a
+            href='https://uiverse.io/'
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-primary underline underline-offset-2 hover:no-underline'
+          >
+            uiverse.io
+          </a>
+          .
+        </p>
       </section>
     </PageTransition>
   );

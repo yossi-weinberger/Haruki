@@ -2,7 +2,9 @@
   --heart-color: rgb(255, 91, 137);
   width: 34px;
   height: 34px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: 50%;

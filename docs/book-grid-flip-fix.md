@@ -3,15 +3,18 @@
 ## Current structure (working, but card "drops" on click)
 
 ### BookGrid
+
 - **Grid:** `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` — no `grid-auto-rows`, so row height is content-based.
 - **AnimatePresence** wraps the list with `mode='popLayout'` — layout animations when children change.
 
 ### BookCard (motion.article)
+
 - **`layout`** — Framer layout animation; any layout change (size/position) is animated.
 - **whileHover:** `{ y: -5, scale: 1.015 }` — card lifts 5px on hover.
 - **className:** `book-flip-shell h-full` — no min-height on the article.
 
 ### CSS
+
 - **.book-flip-content:** `h-full min-h-[28rem] w-full` — fills parent, minimum 28rem. Can grow if parent grows.
 - **.book-flip-face:** `absolute inset-0` — both faces fill the flip container; they do not affect its height.
 - Back face has long content (full description) in flow; overflow is not clipped (no overflow-hidden on shell).

@@ -3,13 +3,17 @@ import './book-like-button.css';
 import { useI18n } from '@/i18n/use-i18n';
 import { cn } from '@/lib/utils';
 
-type BookLikeButtonProps = {
+type BookLikeButtonProperties = {
   isLiked: boolean;
   onToggle: () => void;
   className?: string;
 };
 
-export default function BookLikeButton({ isLiked, onToggle, className }: BookLikeButtonProps) {
+export default function BookLikeButton({
+  isLiked,
+  onToggle,
+  className
+}: Readonly<BookLikeButtonProperties>) {
   const { t } = useI18n();
   const ariaLabel = isLiked ? t('bookRemoveFromMyBooks') : t('bookAddToMyBooks');
 
@@ -19,11 +23,13 @@ export default function BookLikeButton({ isLiked, onToggle, className }: BookLik
         type='checkbox'
         className='checkbox'
         checked={isLiked}
-        onChange={(e) => {
-          e.stopPropagation();
+        onChange={(event) => {
+          event.stopPropagation();
           onToggle();
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
         aria-label={ariaLabel}
       />
       <div className='svg-container' aria-hidden='true'>

@@ -10,8 +10,8 @@ import ThemeToggle from './theme-toggle';
 const NAV_PATHS = ['/search', '/wishlist', '/about'] as const;
 
 function getNavIndex(pathname: string): number {
-  const i = NAV_PATHS.indexOf(pathname as (typeof NAV_PATHS)[number]);
-  return i >= 0 ? i : 0;
+  const index = NAV_PATHS.indexOf(pathname as (typeof NAV_PATHS)[number]);
+  return Math.max(index, 0);
 }
 
 export default function MainNav() {
@@ -26,7 +26,7 @@ export default function MainNav() {
     { to: '/about', label: t('navAbout') }
   ] as const;
 
-  const togglesEl = (
+  const togglesElement = (
     <div
       className={cn(
         'flex items-center gap-2',
@@ -43,7 +43,7 @@ export default function MainNav() {
   return (
     <header className='border-border/80 bg-background/92 sticky top-0 z-20 border-b backdrop-blur-sm'>
       <div className='content-container flex min-h-18 flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2'>
-        <div className='flex items-center justify-start md:flex-1 order-1'>
+        <div className='order-1 flex items-center justify-start md:flex-1'>
           <NavLink
             to='/search'
             className='group flex shrink-0 items-center'
@@ -62,7 +62,7 @@ export default function MainNav() {
 
         <nav
           aria-label='Main navigation'
-          className='bg-muted relative grid w-full max-w-md grid-cols-3 gap-0 overflow-hidden rounded-lg p-1 order-3 md:order-2 mx-auto'
+          className='bg-muted relative order-3 mx-auto grid w-full max-w-md grid-cols-3 gap-0 overflow-hidden rounded-lg p-1 md:order-2'
         >
           <div
             aria-hidden
@@ -70,8 +70,8 @@ export default function MainNav() {
             style={{
               width: 'calc((100% - 0.5rem) / 3)',
               transform: isRtlLanguage
-                ? `translateX(calc(${2 - navIndex} * 100%))`
-                : `translateX(calc(${navIndex} * 100%))`
+                ? `translateX(calc(${String(2 - navIndex)} * 100%))`
+                : `translateX(calc(${String(navIndex)} * 100%))`
             }}
           />
           {links.map((linkItem) => (
@@ -96,8 +96,8 @@ export default function MainNav() {
           ))}
         </nav>
 
-        <div className='flex items-center justify-end md:flex-1 order-2 md:order-3'>
-          {togglesEl}
+        <div className='order-2 flex items-center justify-end md:order-3 md:flex-1'>
+          {togglesElement}
         </div>
       </div>
     </header>
