@@ -18,7 +18,7 @@ export default function BookGrid({
   onToggleBookFlip
 }: Readonly<BookGridProperties>) {
   return (
-    <div className='book-grid grid auto-rows-[26rem] grid-cols-1 gap-4 sm:auto-rows-[32rem] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+    <div className='book-grid grid auto-rows-[24rem] grid-cols-2 gap-3 sm:auto-rows-[32rem] sm:gap-4 lg:grid-cols-3 xl:grid-cols-4'>
       {books.map((book) => (
         <div key={book.id} className='book-grid-item'>
           <BookCard
