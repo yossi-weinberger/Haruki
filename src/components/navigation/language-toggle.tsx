@@ -12,8 +12,7 @@ export default function LanguageToggle() {
   const { t } = useI18n();
 
   return (
-    <div className='border-border bg-background/80 inline-flex items-center rounded-lg border p-1'>
-      <span className='text-muted-foreground px-2 text-xs'>{t('navLanguage')}</span>
+    <div className='border-border bg-background/80 inline-flex items-center rounded-lg border p-1' role='group' aria-label={t('navLanguage')}>
       {languages.map((language) => (
         <button
           key={language}

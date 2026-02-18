@@ -1,0 +1,222 @@
+# מדריך: טאבים עם אנימציית סליידר (כמו בטופס הוספת תנועה)
+
+מדריך זה מתאר איך ליישם טאבים עם סליידר מונפש בסגנון טופס הוספת התנועה, כולל מעבר חלק בין טאבים והחלפת צבע הרקע של הסליידר.
+
+## תוכן עניינים
+
+1. [סקירה כללית](#סקירה-כללית)
+2. [תלויות](#תלויות)
+3. [מבנה הקומפוננטה](#מבנה-הקומפוננטה)
+4. [אנימציית הסליידר](#אנימציית-הסליידר)
+5. [דוגמת קוד מלאה](#דוגמת-קוד-מלאה)
+6. [התאמה למספר טאבים שונה](#התאמה-למספר-טאבים-שונה)
+7. [טיפים ובעיות נפוצות](#טיפים-ובעיות-נפוצות)
+
+---
+
+## סקירה כללית
+
+בטופס הוספת תנועה (`TransactionForm`) בוחרים סוג תנועה (הכנסה / הוצאה / תרומה) באמצעות **טאבים** שמבוססים על Radix UI. האפקט החזותי:
+
+- **TabsList** – רקע אפור (למשל `bg-gray-200 dark:bg-gray-800`) עם פינות מעוגלות.
+- **סליידר** – אלמנט אחד שמרחף מעל הרשימה, עם רקע צבעוני (ירוק/אדום/צהוב לפי סוג), ונע ימינה/שמאלה בהתאם לטאב הנבחר.
+- **TabsTrigger** – שקופים (`bg-transparent`), כך שהסליידר נראה דרכם; הטקסט והאייקון נשארים קבועים.
+
+המעבר בין טאבים מונפש עם `transition` על `transform` ו־`background-color`.
+
+---
+
+## תלויות
+
+הפרויקט משתמש ב־**Radix UI Tabs**:
+
+- `@radix-ui/react-tabs` (כבר בפרויקט)
+- קומפוננטות ה־UI: `Tabs`, `TabsList`, `TabsTrigger` (ו־`TabsContent` אם יש תוכן לכל טאב)
+
+מיקום הקומפוננטות בפרויקט: `src/components/ui/tabs.tsx`.
+
+---
+
+## מבנה הקומפוננטה
+
+1. **Tabs (Root)**  
+   - `value` – הערך של הטאב הנבחר (controlled).  
+   - `onValueChange` – callback כשמחליפים טאב.
+
+2. **TabsList**  
+   - עוטף את כל הכפתורים.  
+   - כאן חייבים:  
+     - `position: relative` (או `relative` ב־Tailwind) כדי שהסליידר יהיה ממורכז ביחס לרשימה.  
+     - `grid` עם מספר עמודות כמו מספר הטאבים (למשל `grid-cols-3`).  
+     - ריווח פנימי (`p-1`) כדי שהסליידר לא יידבק לקצוות.
+
+3. **סליידר (אלמנט מותאם)**  
+   - `div` אחד **בתוך** `TabsList`, **לפני** ה־`TabsTrigger`-ים.  
+   - מיקום: `absolute`, `top-1`, `bottom-1`, `left-1`.  
+   - רוחב: חישוב כך שיהיה רוחב טאב אחד, למשל:  
+     `width: calc((100% - 0.5rem) / 3)` (3 טאבים, עם `p-1` = 0.25rem מכל צד).  
+   - תזוזה: `transform: translateX(calc(${index} * 100%))` כאשר `index` הוא האינדקס של הטאב הנבחר (0, 1, 2…).  
+   - אנימציה: `transition-[transform,background-color] duration-500 ease-in-out` ו־`will-change-transform` לשיפור ביצועים.
+
+4. **TabsTrigger**  
+   - כל כפתור טאב.  
+   - חייבים `relative z-10` כדי שיהיו מעל הסליידר.  
+   - `bg-transparent` ו־`data-[state=active]:bg-transparent` כדי שהסליידר ייראה מתחת.
+
+---
+
+## אנימציית הסליידר
+
+האנימציה מתבססת על שני דברים:
+
+### 1. תזוזה (transform)
+
+- הסליידר בעל רוחב קבוע (רוחב טאב אחד).
+- המיקום האופקי נקבע לפי **אינדקס** הטאב הנבחר:
+  - `index = 0` → `translateX(0)`
+  - `index = 1` → `translateX(100%)` (100% מרוחב הסליידר עצמו)
+  - `index = 2` → `translateX(200%)`
+- ה־CSS:
+  - `transition: transform 500ms ease-in-out`
+  - `will-change: transform` (אופציונלי אבל מומלץ ל־GPU)
+
+### 2. צבע רקע (background-color)
+
+- אם כל טאב מקושר לצבע אחר, מגדירים אובייקט מפה (למשל `indicatorColors[value]`).
+- מוסיפים ל־transition גם את `background-color` עם אותו משך:
+  - `transition-[transform,background-color] duration-500 ease-in-out`
+- כך גם מעבר הצבע בין טאבים יהיה חלק.
+
+דוגמת class לסליידר:
+
+```tsx
+className={cn(
+  "pointer-events-none absolute top-1 bottom-1 left-1 rounded-md shadow-sm",
+  "transition-[transform,background-color] duration-500 ease-in-out",
+  "will-change-transform",
+  sliderColor  // e.g. "bg-green-100 dark:bg-green-900"
+)}
+style={{
+  width: "calc((100% - 0.5rem) / 3)",
+  transform: `translateX(calc(${index} * 100%))`,
+}}
+```
+
+---
+
+## דוגמת קוד מלאה
+
+דוגמה מינימלית (ללא react-hook-form) עם 3 טאבים ואנימציה:
+
+```tsx
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+
+const TABS = ["tab1", "tab2", "tab3"] as const;
+const INDICATOR_COLORS: Record<(typeof TABS)[number], string> = {
+  tab1: "bg-green-100 dark:bg-green-900",
+  tab2: "bg-red-100 dark:bg-red-900",
+  tab3: "bg-yellow-100 dark:bg-yellow-900",
+};
+
+export function AnimatedTabsExample() {
+  const [value, setValue] = useState<(typeof TABS)[number]>("tab1");
+  const index = TABS.indexOf(value);
+  const sliderColor = INDICATOR_COLORS[value];
+
+  return (
+    <Tabs value={value} onValueChange={(v) => setValue(v as (typeof TABS)[number])} className="w-full">
+      <TabsList
+        className={cn(
+          "relative grid w-full grid-cols-3 gap-0 p-1 h-auto",
+          "bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden"
+        )}
+      >
+        {/* Slider - must be first so it sits behind triggers */}
+        <div
+          className={cn(
+            "pointer-events-none absolute top-1 bottom-1 left-1 rounded-md shadow-sm",
+            "transition-[transform,background-color] duration-500 ease-in-out",
+            "will-change-transform",
+            sliderColor
+          )}
+          style={{
+            width: "calc((100% - 0.5rem) / 3)",
+            transform: `translateX(calc(${index} * 100%))`,
+          }}
+          aria-hidden
+        />
+
+        {TABS.map((tab) => (
+          <TabsTrigger
+            key={tab}
+            value={tab}
+            className={cn(
+              "relative z-10",
+              "flex items-center justify-center py-2 px-1 rounded-md",
+              "bg-transparent border-0",
+              "hover:bg-transparent data-[state=active]:bg-transparent",
+              "text-foreground focus-visible:ring-0"
+            )}
+          >
+            {tab}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  );
+}
+```
+
+ההפניה המלאה בפרויקט: `src/components/forms/transaction-form-parts/TransactionTypeSelector.tsx`.
+
+---
+
+## התאמה למספר טאבים שונה
+
+- **2 טאבים:**  
+  - `grid-cols-2`  
+  - רוחב סליידר: `calc((100% - 0.5rem) / 2)`  
+  - `index` ב־0 או 1.
+
+- **4 טאבים:**  
+  - `grid-cols-4`  
+  - רוחב סליידר: `calc((100% - 0.5rem) / 4)`  
+  - `transform: translateX(calc(${index} * 100%))` עם index 0..3.
+
+נוסחה כללית ל־`n` טאבים:
+
+- `TabsList`: `grid grid-cols-{n}`.
+- רוחב סליידר: `calc((100% - 0.5rem) / ${n})`.
+- `index` = האינדקס של הערך הנבחר במערך הטאבים.
+
+---
+
+## טיפים ובעיות נפוצות
+
+1. **הסדר ב-DOM**  
+   הסליידר חייב להיות **לפני** ה־TabsTrigger-ים בתוך ה־TabsList, עם `z-10` על הכפתורים, כדי שהכפתורים יקבלו קליקים והסליידר יישאר מאחור.
+
+2. **רוחב ו-padding**  
+   ה־`0.5rem` ב־`calc((100% - 0.5rem) / 3)` תואם ל־`p-1` (0.25rem מכל צד). אם משנים את ה־padding של TabsList, צריך להתאים את החיסור ב־calc.
+
+3. **RTL**  
+   ב־RTL ייתכן שצריך להכפיל את ה־translate בכיוון הפוך (למשל עם `translateX(calc(-1 * ${index} * 100%))`) או להשתמש ב־`logical properties` אם רוצים תמיכה אוטומטית. בפרויקט הנוכחי הטופס לא הופך את הסליידר ב־RTL; אם תרצו – אפשר להוסיף כיוון לפי `dir`.
+
+4. **נגישות**  
+   Radix Tabs מספק מקלדת ו־ARIA. לסליידר מוסיפים `aria-hidden` כי הוא דקורטיבי בלבד.
+
+5. **ביצועים**  
+   `will-change-transform` על הסליידר עוזר לדרייבר לצייר את האנימציה על ה־GPU. לא להשאיר `will-change` על אלמנטים רבים מדי בעמוד.
+
+---
+
+## סיכום
+
+- שימוש ב־`Tabs` / `TabsList` / `TabsTrigger` מ־`@/components/ui/tabs` (Radix).
+- סליידר אחד – `div` מוחלט בתוך `TabsList`, עם רוחב מחושב ו־`translateX(index * 100%)`.
+- אנימציה: `transition-[transform,background-color] duration-500 ease-in-out` ו־`will-change-transform`.
+- כפתורים שקופים עם `z-10` כדי שהסליידר יישאר מאחור והמעבר בין טאבים ייראה חלק.
+
+להשוואה מלאה עם טופס וניהול state (כולל שמירת flags לפי סוג) – ראו `TransactionTypeSelector.tsx` בטופס הוספת התנועה.

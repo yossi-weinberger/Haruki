@@ -54,7 +54,10 @@ const toSearchQuery = (query: string) => {
     return '';
   }
 
-  return trimmedQuery.replaceAll(/\s+/g, ' ');
+  const normalized = trimmedQuery.replaceAll(/\s+/g, ' ');
+  // Restrict to title/author for more relevant results (avoids full-text matches in description)
+  const phrase = normalized.includes(' ') ? `"${normalized}"` : normalized;
+  return `(intitle:${phrase} OR inauthor:${phrase})`;
 };
 
 const getFallbackSearchQuery = (query: string) => {
@@ -104,7 +107,8 @@ const fetchBooksByQuery = async (query: string, signal?: AbortSignal): Promise<B
   const searchParameters = new URLSearchParams({
     q: query,
     maxResults: '24',
-    printType: 'books'
+    printType: 'books',
+    orderBy: 'relevance'
   });
 
   const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { Book } from '@/features/books/types';
 
@@ -18,6 +18,16 @@ type SearchState = 'idle' | 'loading' | 'success' | 'empty' | 'error';
 const SEARCH_DEBOUNCE_DELAY = 650;
 const MINIMUM_QUERY_LENGTH = 2;
 
+function getErrorMessage(error: unknown, t: (key: string) => string): string {
+  if (error instanceof Error && error.message.toLowerCase().includes('rate limit')) {
+    return t('errorRateLimit');
+  }
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+  return t('errorGeneric');
+}
+
 export default function SearchPage() {
   const { t } = useI18n();
   const [query, setQuery] = useState('');
@@ -31,20 +41,6 @@ export default function SearchPage() {
   const addToWishList = useWishListStore((store) => store.add);
   const removeFromWishList = useWishListStore((store) => store.remove);
   const isInWishList = useWishListStore((store) => store.isInWishList);
-  const toErrorMessage = useCallback(
-    (error: unknown) => {
-      if (error instanceof Error && error.message.toLowerCase().includes('rate limit')) {
-        return t('errorRateLimit');
-      }
-
-      if (error instanceof Error && error.message.trim().length > 0) {
-        return error.message;
-      }
-
-      return t('errorGeneric');
-    },
-    [t]
-  );
 
   useEffect(() => {
     const normalizedQuery = debouncedQuery.trim();
@@ -76,7 +72,7 @@ export default function SearchPage() {
         }
 
         setState('error');
-        setErrorMessage(toErrorMessage(error));
+        setErrorMessage(getErrorMessage(error, t));
       }
     };
 
@@ -85,7 +81,7 @@ export default function SearchPage() {
     return () => {
       abortController.abort();
     };
-  }, [debouncedQuery, searchAttempt, toErrorMessage]);
+  }, [debouncedQuery, searchAttempt]);
 
   useEffect(() => {
     if (!activeBookId) {

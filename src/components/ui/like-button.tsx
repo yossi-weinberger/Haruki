@@ -6,13 +6,19 @@ type LikeButtonProperties = {
   checked: boolean;
   disabled?: boolean;
   className?: string;
+  /** Optional override for aria-label (e.g. translated "Add to my books" / "Remove from my books") */
+  ariaLabel?: string;
   onChange: (checked: boolean) => void;
 };
+
+const DEFAULT_ARIA_ADD = 'Add to my books';
+const DEFAULT_ARIA_REMOVE = 'Remove from my books';
 
 export default function LikeButton({
   checked,
   disabled = false,
   className,
+  ariaLabel,
   onChange
 }: Readonly<LikeButtonProperties>) {
   const [isBursting, setIsBursting] = useState(false);
@@ -23,12 +29,14 @@ export default function LikeButton({
     }
   }, [checked]);
 
+  const label = ariaLabel ?? (checked ? DEFAULT_ARIA_REMOVE : DEFAULT_ARIA_ADD);
+
   return (
     <button
       type='button'
       disabled={disabled}
       aria-pressed={checked}
-      aria-label={checked ? 'Remove from wish list' : 'Add to wish list'}
+      aria-label={label}
       className={cn(
         'heart-button',
         checked ? 'is-active' : null,
