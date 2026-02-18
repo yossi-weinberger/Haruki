@@ -49,29 +49,31 @@ const getErrorMessage = (statusCode: number) => {
   return 'Unable to load books right now. Please try again.';
 };
 
-const toSearchQuery = (query: string) => {
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) {
-    return '';
-  }
-
-  const normalized = trimmedQuery.replaceAll(WHITESPACE_REGEX, ' ');
-  // Restrict to title/author for more relevant results (avoids full-text matches in description)
-  const phrase = normalized.includes(' ') ? `"${normalized}"` : normalized;
-  return `(intitle:${phrase} OR inauthor:${phrase})`;
+const normalizeQueryText = (query: string) => {
+  const trimmed = query.trim();
+  if (!trimmed) return '';
+  return trimmed.replaceAll(WHITESPACE_REGEX, ' ');
 };
 
-const getFallbackSearchQuery = (query: string) => {
-  const normalizedQuery = toSearchQuery(query);
-  if (normalizedQuery.length < 3) {
-    return '';
-  }
+/**
+ * Builds a structured query for title/author only (no description).
+ * Multi-word input is NOT wrapped in quotes so Google can match flexibly
+ * (e.g. Hebrew "קפקא" may match English "Kafka" in full-text fallback).
+ */
+const toSearchQuery = (query: string) => {
+  const normalized = normalizeQueryText(query);
+  if (!normalized) return '';
+  return `(intitle:${normalized} OR inauthor:${normalized})`;
+};
 
-  if (normalizedQuery.startsWith('ה')) {
-    return normalizedQuery.slice(1);
-  }
-
-  return '';
+/**
+ * Returns a plain full-text search query for fallback when structured search finds nothing.
+ * Used to match across scripts (e.g. Hebrew query vs English title) or in other metadata.
+ */
+const getFallbackSearchQuery = (rawUserQuery: string) => {
+  const normalized = normalizeQueryText(rawUserQuery);
+  if (normalized.length < 2) return '';
+  return normalized;
 };
 
 const getCacheKey = (query: string) => query.trim().toLowerCase();
@@ -155,7 +157,7 @@ export const searchGoogleBooks = async (query: string, signal?: AbortSignal): Pr
     return deduplicatedBooks;
   }
 
-  const fallbackSearchQuery = getFallbackSearchQuery(searchQuery);
+  const fallbackSearchQuery = getFallbackSearchQuery(query);
   if (!fallbackSearchQuery) {
     setCachedBooks(searchQuery, []);
     return [];
