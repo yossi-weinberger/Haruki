@@ -3,7 +3,7 @@ type LoadingStateProperties = {
 };
 
 export default function LoadingState({
-  label = 'Loading books...'
+  label = 'Loading books…'
 }: Readonly<LoadingStateProperties>) {
   return (
     <div className='surface flex min-h-52 flex-col items-center justify-center gap-4 p-6'>

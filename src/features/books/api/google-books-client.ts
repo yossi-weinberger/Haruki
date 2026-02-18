@@ -5,6 +5,7 @@ import { adaptGoogleBookVolumes } from '@/features/books/api/book-adapter';
 
 const GOOGLE_BOOKS_ENDPOINT = 'https://www.googleapis.com/books/v1/volumes';
 const MAX_CACHE_ENTRIES = 60;
+const WHITESPACE_REGEX = /\s+/g;
 const RATE_LIMIT_COOLDOWN_IN_MILLISECONDS = 25_000;
 let rateLimitUntil = 0;
 
@@ -54,7 +55,7 @@ const toSearchQuery = (query: string) => {
     return '';
   }
 
-  const normalized = trimmedQuery.replaceAll(/\s+/g, ' ');
+  const normalized = trimmedQuery.replaceAll(WHITESPACE_REGEX, ' ');
   // Restrict to title/author for more relevant results (avoids full-text matches in description)
   const phrase = normalized.includes(' ') ? `"${normalized}"` : normalized;
   return `(intitle:${phrase} OR inauthor:${phrase})`;

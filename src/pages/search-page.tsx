@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Book } from '@/features/books/types';
 
@@ -41,7 +41,25 @@ export default function SearchPage() {
   const addToWishList = useWishListStore((store) => store.add);
   const removeFromWishList = useWishListStore((store) => store.remove);
   const isInWishList = useWishListStore((store) => store.isInWishList);
-  const wishListItems = useWishListStore((store) => store.items); // Subscribe to items to force re-render on change
+  // Subscribe to items so component re-renders when wishlist changes (needed for isInWishList updates)
+  useWishListStore((store) => store.items);
+
+  const handleToggleWish = useCallback(
+    (book: Book, isCurrentlyInWishList: boolean) => {
+      if (isCurrentlyInWishList) {
+        removeFromWishList(book.id);
+        return;
+      }
+      addToWishList(book);
+    },
+    [addToWishList, removeFromWishList]
+  );
+
+  const handleToggleBookFlip = useCallback((bookId: string) => {
+    setActiveBookId((previous) => (previous === bookId ? null : bookId));
+  }, []);
+
+  const bookIdSet = useMemo(() => new Set(books.map((b) => b.id)), [books]);
 
   useEffect(() => {
     const normalizedQuery = debouncedQuery.trim();
@@ -85,15 +103,11 @@ export default function SearchPage() {
   }, [debouncedQuery, searchAttempt]);
 
   useEffect(() => {
-    if (!activeBookId) {
+    if (!activeBookId || bookIdSet.has(activeBookId)) {
       return;
     }
-
-    const hasActiveBook = books.some((book) => book.id === activeBookId);
-    if (!hasActiveBook) {
-      setActiveBookId(null);
-    }
-  }, [activeBookId, books]);
+    setActiveBookId(null);
+  }, [activeBookId, bookIdSet]);
 
   return (
     <PageTransition>
@@ -129,18 +143,9 @@ export default function SearchPage() {
         <BookGrid
           books={books}
           isInWishList={isInWishList}
-          onToggleWish={(book, isCurrentlyInWishList) => {
-            if (isCurrentlyInWishList) {
-              removeFromWishList(book.id);
-              return;
-            }
-
-            addToWishList(book);
-          }}
+          onToggleWish={handleToggleWish}
           activeBookId={activeBookId}
-          onToggleBookFlip={(bookId) => {
-            setActiveBookId((previousBookId) => (previousBookId === bookId ? null : bookId));
-          }}
+          onToggleBookFlip={handleToggleBookFlip}
         />
       ) : null}
     </PageTransition>

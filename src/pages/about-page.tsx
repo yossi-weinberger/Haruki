@@ -26,10 +26,7 @@ export default function AboutPage() {
       </section>
 
       <section className='surface space-y-3 p-5'>
-        <p className='text-sm leading-6 italic'>
-          "If you only read the books that everyone else is reading, you can only think what
-          everyone else is thinking."
-        </p>
+        <p className='text-sm leading-6 italic'>{t('navQuote')}</p>
         <p className='text-muted-foreground text-xs'>{t('aboutQuoteByline')}</p>
       </section>
 

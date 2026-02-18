@@ -1,6 +1,7 @@
 import type { Book } from '@/features/books/types';
 import type { KeyboardEvent } from 'react';
 
+import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 import { useI18n } from '@/i18n/use-i18n';
@@ -17,10 +18,7 @@ type BookCardProperties = {
   onToggleBookFlip: (bookId: string) => void;
 };
 
-const truncatedDescriptionClassName =
-  '[display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden';
-
-export default function BookCard({
+function BookCard({
   book,
   isInWishList,
   onToggleWish,
@@ -65,15 +63,24 @@ export default function BookCard({
           onKeyDown={handleFlipByKeyboard}
         >
           <div className='bg-muted border-border relative flex aspect-[2/3] w-full items-center justify-center border-b'>
-            <BookLikeButton
-              isLiked={isInWishList}
-              onToggle={() => onToggleWish(book, isInWishList)}
-              className='absolute bottom-2 left-2 z-20'
-            />
+            <span
+              className='absolute top-2 right-2 z-20 rtl:left-2 rtl:right-auto'
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <BookLikeButton
+                isLiked={isInWishList}
+                onToggle={() => {
+                  onToggleWish(book, isInWishList);
+                }}
+              />
+            </span>
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
                 alt={`Cover of ${book.title}`}
+                width={200}
+                height={300}
                 loading='lazy'
                 className='h-full w-full object-cover'
               />
@@ -81,6 +88,8 @@ export default function BookCard({
               <img
                 src='/missing.webp'
                 alt={t('bookNoCover')}
+                width={200}
+                height={300}
                 loading='lazy'
                 className='h-full w-full object-cover'
               />
@@ -105,15 +114,27 @@ export default function BookCard({
           onKeyDown={handleFlipByKeyboard}
         >
           <div className='book-flip-back-glow' />
-          <div className='relative z-10 flex h-full flex-col gap-3 px-4 py-4'>
-            <h3 dir={titleDirection} className='text-base leading-snug font-semibold'>
+          <span
+            className='absolute top-2 right-2 z-20 rtl:left-2 rtl:right-auto'
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <BookLikeButton
+              isLiked={isInWishList}
+              onToggle={() => {
+                onToggleWish(book, isInWishList);
+              }}
+            />
+          </span>
+          <div className='relative z-10 flex h-full min-h-0 flex-col gap-3 px-4 py-4'>
+            <h3 dir={titleDirection} className='text-base leading-snug font-semibold shrink-0'>
               {book.title}
             </h3>
-            <p dir={authorDirection} className='text-muted-foreground text-sm'>
+            <p dir={authorDirection} className='text-muted-foreground text-sm shrink-0'>
               {authorText}
             </p>
 
-            <dl className='text-sm'>
+            <dl className='text-sm shrink-0'>
               <div className='flex gap-2'>
                 <dt className='text-muted-foreground min-w-20'>{t('bookPublished')}:</dt>
                 <dd dir={detectTextDirection(book.publishedDate)}>
@@ -128,12 +149,16 @@ export default function BookCard({
               </div>
             </dl>
 
-            <p dir={descriptionDirection} className='text-muted-foreground text-sm leading-6'>
-              {book.description ?? t('bookNoSummaryLong')}
-            </p>
+            <div className='min-h-0 flex-1 overflow-y-auto'>
+              <p dir={descriptionDirection} className='text-muted-foreground text-sm leading-6'>
+                {book.description ?? t('bookNoSummaryLong')}
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </motion.article>
   );
 }
+
+export default memo(BookCard);

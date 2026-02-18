@@ -85,11 +85,14 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
     background-image:
       radial-gradient(circle at 6% 0%, rgb(251 191 36 / 16%), transparent 30%),
       radial-gradient(circle at 88% 8%, rgb(20 83 45 / 12%), transparent 34%);
     font-family: 'Heebo', system-ui, sans-serif;
+    /* Touch-friendly: remove double-tap zoom delay; intentional tap highlight */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgb(245 158 11 / 0.2);
   }
 
   a {
@@ -143,10 +146,17 @@
   }
 
   .book-flip-content {
-    @apply relative h-[32rem] w-full;
+    @apply relative w-full;
+    height: 26rem;
     transform-style: preserve-3d;
     transform-origin: center center;
     transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (min-width: 640px) {
+    .book-flip-content {
+      height: 32rem;
+    }
   }
 
   .book-flip-content.is-flipped {
@@ -176,10 +186,21 @@
       radial-gradient(circle at 45% 88%, rgb(251 191 36 / 22%), transparent 52%);
   }
 
+  .book-grid-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 26rem;
+  }
+
+  @media (min-width: 640px) {
+    .book-grid-item {
+      contain-intrinsic-size: 0 32rem;
+    }
+  }
+
   .heart-button {
     --heart-color: #ef476f;
     --heart-outline: color-mix(in srgb, var(--heart-color) 58%, #ffffff 42%);
-    @apply relative flex h-9 w-9 items-center justify-center rounded-full border border-transparent transition-all duration-200;
+    @apply relative flex h-9 w-9 items-center justify-center rounded-full border border-transparent transition-[border-color,background-color,transform,box-shadow] duration-200;
   }
 
   .heart-button:hover {
@@ -334,7 +355,7 @@
     height: var(--switch-height);
     border-radius: var(--switch-radius);
     background: var(--switch-day-bg);
-    transition: 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
+    transition: background 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
     cursor: pointer;
   }
 
@@ -356,14 +377,14 @@
     box-shadow:
       inset 0 0 0 3.2rem rgb(255 255 255 / 8%),
       0 0 0 0.5rem rgb(255 255 255 / 9%);
-    transition: 0.35s cubic-bezier(0, -0.02, 0.35, 1.17);
+    transition: left 0.35s cubic-bezier(0, -0.02, 0.35, 1.17);
     pointer-events: none;
   }
 
   .theme-switch__sun,
   .theme-switch__moon {
     @apply absolute h-6 w-6 rounded-full;
-    transition: 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
+    transition: transform 0.45s cubic-bezier(0, -0.02, 0.4, 1.25), opacity 0.45s cubic-bezier(0, -0.02, 0.4, 1.25), visibility 0.45s;
   }
 
   .theme-switch__sun {
@@ -421,7 +442,7 @@
       2.2rem 0 #f3fdff,
       2.9rem 0.31rem #f3fdff,
       3.6rem -0.05rem #f3fdff;
-    transition: 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
+    transition: bottom 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
   }
 
   .theme-switch__stars {
@@ -430,7 +451,7 @@
     top: -120%;
     left: 0.3rem;
     width: 2.85rem;
-    transition: 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
+    transition: top 0.45s cubic-bezier(0, -0.02, 0.4, 1.25), transform 0.45s cubic-bezier(0, -0.02, 0.4, 1.25);
   }
 
   .theme-switch__checkbox:focus-visible + .theme-switch__container {

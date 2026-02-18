@@ -28,16 +28,20 @@ export default function SearchBar({
       <label htmlFor='book-search-input' className='text-sm font-medium'>
         {t('searchInputLabel')}
       </label>
-      <div className='flex gap-2'>
-        <Input
-          id='book-search-input'
+      <div className='flex min-w-0 flex-1 gap-2'>
+        <div className='min-w-0 flex-1'>
+          <Input
+            id='book-search-input'
+          name='search'
+          autoComplete='off'
           value={query}
           placeholder={t('searchInputPlaceholder')}
           aria-label={t('searchInputLabel')}
           onChange={(event_) => {
             onQueryChange(event_.currentTarget.value);
           }}
-        />
+          />
+        </div>
         <Button
           type='submit'
           variant='outline'
