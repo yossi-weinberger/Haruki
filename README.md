@@ -80,9 +80,7 @@ src/
    npm install
    ```
 
-2. **Optional: Google Books API key** (for higher quota)
-
-   Create `.env.local`:
+2. **Optional: Google Books API key** (for higher quota, fewer 429 rate limits)
 
    ```bash
    VITE_GOOGLE_BOOKS_API_KEY=your_api_key_here
