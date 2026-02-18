@@ -41,6 +41,7 @@ export default function SearchPage() {
   const addToWishList = useWishListStore((store) => store.add);
   const removeFromWishList = useWishListStore((store) => store.remove);
   const isInWishList = useWishListStore((store) => store.isInWishList);
+  const wishListItems = useWishListStore((store) => store.items); // Subscribe to items to force re-render on change
 
   useEffect(() => {
     const normalizedQuery = debouncedQuery.trim();

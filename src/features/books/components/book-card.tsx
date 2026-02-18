@@ -3,10 +3,11 @@ import type { KeyboardEvent } from 'react';
 
 import { motion, useReducedMotion } from 'framer-motion';
 
-import LikeButton from '@/components/ui/like-button';
 import { useI18n } from '@/i18n/use-i18n';
 import { detectTextDirection } from '@/lib/text-direction';
 import { cn } from '@/lib/utils';
+
+import BookLikeButton from './book-like-button';
 
 type BookCardProperties = {
   book: Book;
@@ -52,7 +53,7 @@ export default function BookCard({
       layout
       whileHover={shouldReduceMotion ? undefined : { y: -5, scale: 1.015 }}
       transition={shouldReduceMotion ? undefined : { duration: 0.18, ease: 'easeOut' }}
-      className='book-flip-shell h-full'
+      className='book-flip-shell relative h-full'
     >
       <div className={cn('book-flip-content', isFlipped ? 'is-flipped' : null)}>
         <div
@@ -63,7 +64,12 @@ export default function BookCard({
           onClick={flipCard}
           onKeyDown={handleFlipByKeyboard}
         >
-          <div className='bg-muted border-border flex aspect-[3/4] w-full items-center justify-center border-b'>
+          <div className='bg-muted border-border relative flex aspect-[2/3] w-full items-center justify-center border-b'>
+            <BookLikeButton
+              isLiked={isInWishList}
+              onToggle={() => onToggleWish(book, isInWishList)}
+              className='absolute bottom-2 left-2 z-20'
+            />
             {book.thumbnail ? (
               <img
                 src={book.thumbnail}
@@ -72,7 +78,12 @@ export default function BookCard({
                 className='h-full w-full object-cover'
               />
             ) : (
-              <span className='text-muted-foreground text-xs'>{t('bookNoCover')}</span>
+              <img
+                src='/missing.webp'
+                alt={t('bookNoCover')}
+                loading='lazy'
+                className='h-full w-full object-cover'
+              />
             )}
           </div>
           <div className='flex h-full min-h-0 flex-col px-4 py-4'>
@@ -82,21 +93,6 @@ export default function BookCard({
             <p dir={authorDirection} className='text-muted-foreground mt-2 text-sm'>
               {authorText}
             </p>
-            <p
-              dir={descriptionDirection}
-              className={cn('text-muted-foreground mt-3 text-sm', truncatedDescriptionClassName)}
-            >
-              {description}
-            </p>
-            <div className='border-border/70 mt-auto flex items-center justify-center border-t pt-3'>
-              <LikeButton
-                checked={isInWishList}
-                className='bg-background/85'
-                onChange={() => {
-                  onToggleWish(book, isInWishList);
-                }}
-              />
-            </div>
           </div>
         </div>
 
@@ -135,16 +131,6 @@ export default function BookCard({
             <p dir={descriptionDirection} className='text-muted-foreground text-sm leading-6'>
               {book.description ?? t('bookNoSummaryLong')}
             </p>
-
-            <div className='border-border/70 mt-auto flex items-center justify-center border-t pt-3'>
-              <LikeButton
-                checked={isInWishList}
-                className='bg-background/85'
-                onChange={() => {
-                  onToggleWish(book, isInWishList);
-                }}
-              />
-            </div>
           </div>
         </div>
       </div>
